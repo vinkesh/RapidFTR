@@ -27,7 +27,7 @@ module ChildBuilder
   def with_audio(audio, audio_id ="audio", current = true)
     audio = mock(FileAttachment, {:content_type => audio.content_type, :mime_type => audio.mime_type, :data => StringIO.new(audio.read)})
     @child.stub!(:media_for_key).with(audio_id).and_return audio
-    @child.stub!(:audio).and_return audio if current
+    @child.stub!(:audio).and_return [audio] if current
   end
 
   def with_no_photos

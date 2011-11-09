@@ -33,5 +33,26 @@ describe ChildrenHelper do
 		it "should comma separate values if field value is an array" do
 			helper.field_value_for_display(["A", "B", "C"]).should == "A, B, C"
 		end
-	end
+  end
+
+  describe "is audio playable in browser" do
+    it "should return true if atleast one of the audio files are playable in browser" do
+      current_time = Time.parse("Feb 20 2010 12:04:32")
+      Time.stub!(:now).and_return current_time
+      child = Child.create('audio' => multiple_audio_upload)
+      child['audio_attachments'].size.should == 2
+      child['audio_attachments'].collect do |audio_attachment|
+        child.should_receive(:read_attachment).with(audio_attachment['original']).and_return("Some audio")
+      end
+      helper.is_playable_in_browser(child.audio).should be_true
+    end
+
+    it "should return false if none of the audio files are playable in browser" do
+      current_time = Time.parse("Feb 20 2010 12:04:32")
+      Time.stub!(:now).and_return current_time
+      child = Child.create('audio' => uploadable_audio_ogg)
+      child.should_not_receive(:read_attachment)
+      helper.is_playable_in_browser(child.audio).should be_false
+    end
+  end
 end

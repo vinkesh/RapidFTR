@@ -356,3 +356,7 @@ ul.history-details li { list-style:none; background: none; padding-left: 0; bord
 .form-fields-container .fields-container .field-container {display: none;}
 .form-fields-container .prev-selected:hover {cursor: auto; }
 .form-fields-container .prev-selected { background-color: #EEE; }
+
+/* audio-download-css */
+.audio-download-section {display:block; float:inherit;}
+.audio-section-label {width:140px}

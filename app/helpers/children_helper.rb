@@ -13,11 +13,12 @@ module ChildrenHelper
   def link_to_download_audio_with_key(key)
     link_to key.humanize, child_audio_url(@child.id,key),:id => key, :target => '_blank'
   end
-  
+
   def is_playable_in_browser audio
-    AudioMimeTypes.browser_playable? audio.mime_type
+    return false unless audio
+    audio.any? {|audio_file| AudioMimeTypes.browser_playable? audio_file.mime_type }
   end
-  
+
   def link_to_update_info(child)
     link_to('and others', child_history_path(child)) unless child.has_one_interviewer?
   end
@@ -32,10 +33,10 @@ module ChildrenHelper
     "Reunited"
   end
 
-	def field_value_for_display field_value
-		return "&nbsp;" if field_value.nil? || field_value.length==0
-		return field_value.join ", " if field_value.instance_of? Array
-		return field_value
+  def field_value_for_display field_value
+    return "&nbsp;" if field_value.nil? || field_value.length==0
+    return field_value.join ", " if field_value.instance_of? Array
+    return field_value
   end
 
 end

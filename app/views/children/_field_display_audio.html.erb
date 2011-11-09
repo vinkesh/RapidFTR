@@ -1,16 +1,22 @@
 <% if child.audio %>
-<li><span class="profile-section-label"><%= field.display_name %>:</span>
-  <%= link_to "download", child_audio_url(child), {:id=>"audio_link"}%></li>
+
   <% if is_playable_in_browser(child.audio)%>
 		<li>
  		 <audio controls="controls" id="child_audio">
   		 <source src="<%=child_audio_url(child)%>"/>
-    		 Your browser is unable to play this audio file. You can download the file using the link above.
+    		 Your browser is unable to play this audio file. You can download the file using the link below.
  		 </audio>
-
-    	<%= render :partial => "audio_player" %>
-
+    	<%= render :partial => "audio_player", :locals => {:content_type => "mp3"}%>
 		</li>
- 
 	<% end %>
+
+<li><span class="profile-section-label"><%= field.display_name %>:</span>
+  <div class="audio-download-section">
+  <% child.audio_attachments.each do |attachment|%>
+      <span class="audio-section-label"><%= attachment.keys.reject{|key,value| value == "original"}[0] %></span>|
+      <span class="audio-section-label"><%= link_to "download", child_audio_url(child.id, attachment["original"]), {:id=>"audio_link"}%></span>|
+      <span class="audio-section-label"><a href="#" onclick='loadAudioPlayer("<%= child_audio_url(child.id, attachment["original"])%>", "<%= attachment.keys.reject{|key,value| value == "original"}[0]%>");'>play</a></span>
+      <br/>
+  <% end %>
+  </div>
 <% end %>

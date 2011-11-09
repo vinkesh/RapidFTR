@@ -87,7 +87,6 @@ function saveOrder(event) {
 	formId = $('#sectionId').html();
     }
 
-    
     $.ajax({
 	type: "POST",
 	data: {"form_order" : form_order,
@@ -102,4 +101,20 @@ function saveOrder(event) {
 	    }
 	}
     });
+	$.ajax({
+		type: "POST",
+		data: {"form_order" : form_order},
+		url: '/form_section/save_order',
+		success: function(data) {
+		            $("#form_sections").html($(data).find("#form_sections"));
+					$("a.moveDown").bind("click", moveDown);
+					$("a.moveUp").bind("click", moveUp);
+					initOrderingColumns();		
+		        }
+	});
+}
+
+function loadAudioPlayer(source, audioContentType){
+    setAudioSources(source,audioContentType);
+    return false;
 }

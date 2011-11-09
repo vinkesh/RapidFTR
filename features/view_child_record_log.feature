@@ -100,7 +100,7 @@ Feature:
 
     Then I fill in "George Harrison" for "Name"
     And I attach a photo "features/resources/jorge.jpg"
-    And I attach the file "features/resources/sample.mp3" to "Recorded Audio"
+    And I attach an audio file "features/resources/sample.mp3"
     And the date/time is "Oct 29 2010 14:12:15UTC"
     And I press "Save"
 

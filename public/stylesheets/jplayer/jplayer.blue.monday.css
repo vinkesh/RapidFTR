@@ -149,7 +149,7 @@ div.jp-play-bar {
 
 /* The seeking class is added/removed inside jPlayer */
 div.jp-seeking-bg {
-	background: url("pbar-ani.gif");
+	/*background: url("pbar-ani.gif");*/
 }
 
 a.jp-mute,

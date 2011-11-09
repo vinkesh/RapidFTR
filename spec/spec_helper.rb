@@ -143,6 +143,10 @@ def uploadable_audio(audio_path = "features/resources/sample.amr")
   audio
 end
 
+def multiple_audio_upload
+  audio_hash = {"0" => uploadable_audio_amr, "1" => uploadable_audio_mp3}
+end
+
 def uploadable_large_audio
   large_audio = "features/resources/huge.mp3"
   f = File.new(large_audio, "w+")

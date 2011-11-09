@@ -26,7 +26,7 @@ class Child < CouchRestRails::Document
 
   validates_with_method :validate_photos
   validates_with_method :validate_photos_size
-  validates_with_method :validate_audio_file_name
+  validates_with_method :validate_audio_file_type
   validates_with_method :validate_audio_size
   validates_fields_of_type Field::NUMERIC_FIELD
   validates_fields_of_type Field::TEXT_FIELD
@@ -80,12 +80,12 @@ class Child < CouchRestRails::Document
   end
 
   def validate_audio_size
-    return true if @audio.blank? || @audio.size < 10.megabytes
+    return true if @audio_files.blank? || @audio_files.all?{|audio| valid_audio_file_size(audio)}
     [false, "File is too large"]
   end
 
-  def validate_audio_file_name
-    return true if @audio_file_name == nil || /([^\s]+(\.(?i)(amr|mp3))$)/ =~ @audio_file_name
+  def validate_audio_file_type
+    return true if @audio_files.blank? || @audio_files.all?{|audio| valid_audio_file_type(audio)}
     [false, "Please upload a valid audio file (amr or mp3) for this child record"]
   end
 
@@ -258,24 +258,38 @@ class Child < CouchRestRails::Document
   end
   
   def audio
-    return nil if self['audio_attachments'].nil?
-    attachment_key = self['audio_attachments']['original']
-    return nil unless has_attachment? attachment_key
-
-    data = read_attachment attachment_key
-    content_type = self['_attachments'][attachment_key]['content_type']
-    FileAttachment.new attachment_key, content_type, data
+    return nil if self['audio_attachments'].blank?
+    file_attachments = []
+    self['audio_attachments'] =  [self['audio_attachments']] if self['audio_attachments'].is_a? Hash
+    self['audio_attachments'].collect do |attachment|
+      attachment_key = attachment['original']
+      next unless has_attachment? attachment_key
+      file_attachments << attachment(attachment_key)
+    end
+    file_attachments.empty? ? nil : file_attachments
   end
 
   def audio=(audio_file)
-    return unless audio_file.respond_to? :content_type
-    @audio_file_name = audio_file.original_path
-    @audio = audio_file
-    attachment = FileAttachment.from_uploadable_file(audio_file, "audio")
+    return unless audio_file
+    if audio_file.is_a? Hash
+      audio_attachment_values = audio_file.values
+    else
+      audio_attachment_values = [audio_file]
+    end
+
+    @audio_files = []
+    @new_audio_keys = audio_attachment_values.select{|audio_file| audio_file.respond_to? :content_type}.collect do |audio_file|
+      @audio_files << audio_file
+      attach_audio_if_valid(audio_file)
+    end
+  end
+
+  def attach_audio_if_valid(audio_file)
+    return unless (valid_audio_file_type(audio_file) and valid_audio_file_size(audio_file))
+    attachment = FileAttachment.from_uploadable_file(audio_file, "audio-#{audio_file.path.hash}")
     self['recorded_audio'] = attachment.name
     attach(attachment)
     setup_original_audio(attachment)
-    setup_mime_specific_audio(attachment)
   end
 
   def add_audio_file(audio_file, content_type)
@@ -372,7 +386,7 @@ class Child < CouchRestRails::Document
   def attach(attachment)
     create_attachment :name => attachment.name,
                       :content_type => attachment.content_type,
-                      :file => attachment.data  
+                      :file => attachment.data
   end  
   
   def deprecated_fields
@@ -382,19 +396,27 @@ class Child < CouchRestRails::Document
   end
 
   def setup_original_audio(attachment)
-    audio_attachments = (self['audio_attachments'] ||= {})
-    audio_attachments.clear
-    audio_attachments['original'] = attachment.name
+   self['audio_attachments'] ||= []
+   content_type_for_key = attachment.mime_type.to_sym.to_s
+   self['audio_attachments'] =  [self['audio_attachments']] if self['audio_attachments'].is_a? Hash
+   self['audio_attachments'] += [{'original' => attachment.name, content_type_for_key => attachment.name}]
   end
 
   def setup_mime_specific_audio(file_attachment)
-    audio_attachments = (self['audio_attachments'] ||= {})
+    self['audio_attachments'] ||= []
     content_type_for_key = file_attachment.mime_type.to_sym.to_s
-    audio_attachments[content_type_for_key] = file_attachment.name
+    self['audio_attachments'] += [{content_type_for_key => file_attachment.name}]
   end
 
   def key_for_content_type(content_type)
     Mime::Type.lookup(content_type).to_sym.to_s
   end
-  
+
+  def valid_audio_file_type(audio_file)
+    return audio_file.content_type.match(/(amr|mp3|mpeg)$/)
+  end
+
+  def valid_audio_file_size(audio_file)
+    return audio_file.size < 10.megabytes
+  end
 end

@@ -97,6 +97,22 @@ RapidFTR.childPhotoRotation = {
     }
 };
 
+RapidFTR.addAudioRecording = function() {
+    $('#addRecording').unbind("click").click(function() {
+        var fileItem = $('#files p:last').clone();
+        fileItem.children().remove('a');
+        fileItem.find('label').html("&nbsp;");
+        var fileTypeElement = fileItem.find('input[type="file"]');
+        fileTypeElement.val("");
+        var temp = fileTypeElement.attr('name');
+        var fileTypeIdToSet = temp.replace(/[^0-9\\.]/g, '').replace(/^(\d*\.\d*)\..*$/, "$1") * 1.0 +1;
+        var fileTypeNameToSet = temp.replace(/[\d\.]+/g, '');
+        fileTypeElement.attr('id',fileTypeIdToSet);
+        fileTypeElement.attr('name',fileTypeNameToSet + fileTypeIdToSet);
+        $("#files").append(fileItem);
+        return false;
+    });
+}
 $(document).ready(function() {
 });
 
@@ -111,5 +127,6 @@ $(document).ready(function() {
     $('#dialog').hide();
     if (window.location.href.indexOf('login') === -1) {
     IdleSessionTimeout.start();
-  }
+  };
+  RapidFTR.addAudioRecording();
 });

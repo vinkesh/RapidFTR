@@ -1,6 +1,11 @@
-<p class="file">
-  <%= label_tag "child[audio]", "Recorded Audio" %>
-  <%= file_field_tag "child[audio]" %>
+<p>
+  <%= render :partial => "field_display_audio", :locals => {:field => audio_upload_box, :child => @child}%>
+</p>
+<div class="file" id="files">
+<p>
+  <%= label_tag  "Add new recording" %>
+  <%= file_field_tag "child[audio]0" %>
+  <%= link_to  image_tag("icon-add.png", :title => "Attach another Audio file"), "#", :id => "addRecording" %>
   <% if audio_upload_box.help_text.present?%> 
   <br />
   <span class='help-text-container'>
@@ -10,3 +15,4 @@
   </span>
   <% end%>
 </p>
+</div>

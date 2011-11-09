@@ -13,7 +13,7 @@ end
 
 When /^I attach an audio file "([^"]*)"$/ do |audio_path|
   steps %Q{
-    When I attach the file "#{audio_path}" to "child[audio]"
+    When I attach the file "#{audio_path}" to "child[audio]0"
   }
 end
 
